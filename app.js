@@ -3,6 +3,8 @@ const timeRouter = require("./routes/timeRoutes");
 const userRouter = require("./routes/userRouter");
 const notFound = require("./middleware/not-found.js");
 const baseError = require("./middleware/base-error.js");
+const authenticationMiddleware = require("./middleware/authentication.js");
+const taskRouter = require("./routes/taskRoutes.js");
 
 const app = express();
 
@@ -25,6 +27,10 @@ app.post("/testpost", (req, res) => {
     message: "POST route works",
   });
 });
+
+
+app.use("/api/tasks", authenticationMiddleware, taskRouter);
+
 
 app.use(notFound);
 app.use(baseError);
