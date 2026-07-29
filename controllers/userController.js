@@ -1,30 +1,72 @@
-let register = (req, res) => {
-    let {name, email, password} = req.body;
+const crypto = require("crypto");
+const util = require("util");
+const { userSchema } = require("../validation/userSchema");
 
-    let user = {
-        name: name,
-        email: email,
-        password: password
-    }
 
-    global.users.push(user);
-    global.user_id = user;
+
+const scrypt = util.promisify(crypto.scrypt);
+
+
+
+async function hashPassword(password) {
+  const salt = crypto.randomBytes(16).toString("hex");
+  const derivedKey = await scrypt(password, salt, 64);
+  return `${salt}:${derivedKey.toString("hex")}`;
+}
+
+async function comparePassword(inputPassword, storedHash) {
+  const [salt, key] = storedHash.split(":");
+  const keyBuffer = Buffer.from(key, "hex");
+  const derivedKey = await scrypt(inputPassword, salt, 64);
+  return crypto.timingSafeEqual(keyBuffer, derivedKey);
+}
+
+
+
+let register = async (req, res) => {
+
+    const { error, value } = userSchema.validate(req.body, { abortEarly: false });
+
+    if(error) return res.status(400).json({errors: error.details.map(detail => detail.message)})
+
+    let {name, email, password} = value;
+
+    const hashedPassword = await hashPassword(password);
+
+    const newUser = {
+        email,
+        name,
+        hashedPassword,
+    };
+
+    global.users.push(newUser);
+    global.user_id = newUser;
 
     res.status(201)
-    res.json({name: user.name, email: user.email});
+    res.json({name: newUser.name, email: newUser.email});
 
 }
 
-let logon = (req, res) => {
+let logon = async (req, res) => {
 
     let {email, password} = req.body;
 
-    let user = global.users.find(user => user.email == email && user.password == password);
+    let user = global.users.find(user => user.email == email);
 
     if(!user){
         res.status(401);
-        return res.json({error: "Credenciais inválidas"});
+        return res.json({error: "User Not Found"});
     }
+
+    const goodCredentials = await comparePassword(
+        password,
+        user.hashedPassword,
+    );
+
+    if (!goodCredentials) {
+        res.status(401);
+        return res.json({ error: "Invalid credentials" });
+        }
 
     global.user_id = user;
 
