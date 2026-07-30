@@ -78,7 +78,7 @@ let logoff = (req, res) => {
 
     global.user_id = null;
 
-    res.status(200);
+    res.statusStatus(200);
 
 }
 
