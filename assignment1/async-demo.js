@@ -46,7 +46,7 @@ new Promise((resolve, reject) => {
   });
 })
   .then(content => {
-    console.log("Promise read", content);
+    console.log("Promise read:", content);
   })
   .catch(error => {
     console.error("Promise style error reading file:", error);
@@ -66,13 +66,18 @@ new Promise((resolve, reject) => {
 
 
   // 3. Async/Await style
+try {
 
-  (async () => {
-  const content = await new Promise((resolve, reject) => {
-    fs.readFile(path.join(__dirname, "sample-files", "sample.txt"), "utf-8", (error, data) => {
-      if (error) reject(error);
-      else resolve(data);
-    });
-  });
-  console.log("Async/Await read:", content);
-})();
+    (async () => {
+      const content = await new Promise((resolve, reject) => {
+        fs.readFile(path.join(__dirname, "sample-files", "sample.txt"), "utf-8", (error, data) => {
+          if (error) reject(error);
+          else resolve(data);
+        });
+      });
+      console.log("Async/Await read:", content);
+    })();
+
+} catch (error) {
+  console.error("Async/Await style error reading file:", error.message);
+};

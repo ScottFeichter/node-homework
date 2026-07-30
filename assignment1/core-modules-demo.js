@@ -15,7 +15,7 @@ console.log("Total Memory:", os.totalmem());
 
 
 // Path module
-console.log("Joined path:", path.join(__dirname, "sample-files"));
+console.log("Joined path:", path.join(__dirname, "sample-files", "folder", "file.txt"));
 
 // fs.promises API
 (async () => {
