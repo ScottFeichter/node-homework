@@ -23,7 +23,7 @@ let logon = (req, res) => {
 
     if(!user){
         res.status(401);
-        return res.json({error: "Credenciais inválidas"});
+        return res.json({error: "Invalid Credentials"});
     }
 
     global.user_id = user;
